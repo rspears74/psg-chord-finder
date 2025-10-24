@@ -1,6 +1,6 @@
 import streamlit as st
 from pedal_steel import PedalSteel, Note
-from chord_finder import ChordFinder
+from chord_finder import ChordFinder, CHORD_TYPES
 from chord_lookup import find_chord_positions
 
 # --- Streamlit UI setup ---
@@ -57,7 +57,12 @@ if mode == "Chords at Position":
                 if (n if not show_octave else n[:-1] if n[-1].isdigit() else n) in chord_note_set
             ]
             chord_string_counts.append((chord, len(string_numbers), string_numbers))
-        chord_string_counts.sort(key=lambda x: (-x[1], x[0]['root'], x[0]['type']))
+        # Sort by chord type order (from CHORD_TYPES), then by number of strings (descending)
+        chord_type_order = list(CHORD_TYPES.keys())
+        chord_string_counts.sort(key=lambda x: (
+            chord_type_order.index(x[0]['type']) if x[0]['type'] in chord_type_order else 999,
+            -x[1]
+        ))
         sorted_chords = [x[0] for x in chord_string_counts]
         sorted_string_numbers = [x[2] for x in chord_string_counts]
 
