@@ -33,7 +33,7 @@ jobs:
       - name: Deploy on droplet
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
-            cd /home/randall/psg_app
+            cd /home/randall/psg
             docker compose pull
             docker compose up -d
             docker image prune -f
