@@ -77,16 +77,25 @@ if mode == "Chords at Position":
 
         st.subheader("Fretboard Diagram")
         fretboard_table = []
+        in_chord_flags = []
         for i, note in enumerate(reversed(notes), 1):
             note_name = note if not show_octave else note[:-1] if note[-1].isdigit() else note
-            in_chord = "🟢" if note_name in chord_note_set else "⚪️"
+            in_chord = note_name in chord_note_set
+            in_chord_flags.append(in_chord)
             fretboard_table.append({
                 "String": i,
-                "Note": note,
-                "In Chord?": in_chord
+                "Note": note
             })
         fretboard_df = pd.DataFrame(fretboard_table)
-        st.dataframe(fretboard_df, hide_index=True)
+
+        # Apply row shading for notes in chord
+        def highlight_rows(row):
+            if in_chord_flags[row.name]:
+                return ['background-color: rgba(76, 175, 80, 0.3)'] * len(row)
+            return [''] * len(row)
+
+        styled_df = fretboard_df.style.apply(highlight_rows, axis=1)
+        st.dataframe(styled_df, hide_index=True)
 
         string_numbers_str = ', '.join(str(s) for s in sorted(selected_string_numbers, reverse=True))
         st.write(f"**{selected_chord['root']} {selected_chord['type']}** uses strings: {string_numbers_str}")
@@ -188,17 +197,25 @@ elif mode == "Find Positions for Chord":
 
         st.subheader("Fretboard Diagram")
         fretboard_table = []
+        in_chord_flags = []
         # Iterate from string 1 to 10 to match the other diagram
         for i, note in enumerate(reversed(notes2), 1):
             is_in_chord = i in pos['strings']
-            in_chord_symbol = "🟢" if is_in_chord else "⚪️"
+            in_chord_flags.append(is_in_chord)
             fretboard_table.append({
                 "String": i,
-                "Note": note if is_in_chord else "",
-                "In Chord?": in_chord_symbol if is_in_chord else ""
+                "Note": note
             })
         fretboard_df = pd.DataFrame(fretboard_table)
-        st.dataframe(fretboard_df, hide_index=True)
+
+        # Apply row shading for notes in chord
+        def highlight_rows(row):
+            if in_chord_flags[row.name]:
+                return ['background-color: rgba(76, 175, 80, 0.3)'] * len(row)
+            return [''] * len(row)
+
+        styled_df = fretboard_df.style.apply(highlight_rows, axis=1)
+        st.dataframe(styled_df, hide_index=True)
 
     # Handle case where a search was performed but no results were found
     elif st.session_state.positions is not None:
